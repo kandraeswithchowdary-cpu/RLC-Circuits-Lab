@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RLC series circuit calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1020;--surf:#121a2e;--surf2:#18223a;--line:#27345a;--tx:#e8edf8;--mut:#93a0c0;--r:#ffb454;--l:#4fd1e8;--c:#b794f6;--v:#7aa2ff;--i:#ff7b9c;--p:#5fe3a1;
+color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 16px/1.5 'Bricolage Grotesque',system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 18px 48px}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.05;margin:0 0 8px;font-weight:800;letter-spacing:-.02em}
+h2{font-size:19px;margin:30px 0 12px;font-weight:600}
+.lede{color:var(--mut);max-width:62ch;margin:0}
+.by{display:inline-block;margin:0 0 14px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surf);font-size:14px;color:var(--mut)}
+.by b{color:var(--tx);font-weight:600}
+.panel{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h2{margin-top:0}
+.top{display:grid;grid-template-columns:330px 1fr;gap:18px;margin-top:24px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
+.row{display:flex;gap:8px}
+input,select,button{font:inherit;color:var(--tx);background:var(--surf2);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+input{flex:1;min-width:0}
+select{width:84px}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--v);outline-offset:1px}
+.btns{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+button{cursor:pointer;transition:border-color .15s,background .15s}
+button:hover{border-color:var(--v);background:#1e2b4a}
+#msg{min-height:22px;margin:10px 0 0;font-size:14px;color:var(--r)}
+.stage{padding:10px;background-image:radial-gradient(#25325a 1px,transparent 1px);background-size:22px 22px;display:flex;align-items:center}
+.stage svg{width:100%;height:auto;display:block}
+svg text{fill:var(--tx);font-family:inherit}
+.sm{font-size:14px}.mu{fill:var(--mut)!important}
+.grp{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px}
+.card{background:var(--surf);border:1px solid var(--line);border-left:3px solid var(--ac,var(--line));border-radius:12px;padding:12px 14px}
+.card .n{font-size:14px;color:var(--mut)}
+.card .v{font-size:26px;font-weight:600;line-height:1.2}
+.card .v small{font-size:15px;font-weight:400;color:var(--mut);margin-left:4px}
+.card .s{font-size:13px;color:var(--mut)}
+.two{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-top:30px}
+canvas{width:100%;height:280px;display:block}
+#leg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+#leg button{padding:4px 10px;font-size:13px;border-radius:999px;display:flex;align-items:center;gap:6px}
+#leg i{width:10px;height:10px;border-radius:50%;display:inline-block}
+#leg button.off{opacity:.4}
+.eq{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px 28px;color:var(--mut);font-size:14px;margin-top:8px}
+.eq b{color:var(--tx);font-weight:600}
+#flow{animation:none}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:10px;align-items:start}
+details.st{background:var(--surf);border:1px solid var(--line);border-left:3px solid var(--ac,var(--line));border-radius:12px;padding:0}
+details.st summary{cursor:pointer;padding:12px 14px;font-weight:600;display:block;list-style:none}
+.st .sh{display:flex;justify-content:space-between;gap:10px}
+details.st summary::-webkit-details-marker{display:none}
+details.st summary span{color:var(--mut);font-weight:400}
+details.st[open] summary{border-bottom:1px solid var(--line)}
+.st ol{margin:0;padding:12px 14px 14px 34px;font-size:14px;color:var(--mut)}
+.st li{margin-bottom:8px}
+.st li b{color:var(--tx);font-weight:600}
+.st code{font:inherit;color:var(--tx);overflow-wrap:anywhere}
+.st li.res code{color:var(--p);font-weight:600}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--mut);font-size:14px}
+footer b{color:var(--tx);font-weight:600}
+[hidden]{display:none!important}
+.nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:14px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+.nav .brand{font-weight:800;margin-right:auto;letter-spacing:-.01em}
+.nav a,.cta{color:var(--tx);text-decoration:none;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:var(--surf2);transition:border-color .15s,background .15s}
+.nav a:hover,.cta:hover{border-color:var(--v);background:#1e2b4a}
+.nav a[aria-current=page]{background:var(--v);border-color:var(--v);color:#0b1020;font-weight:600}
+.nav a:focus-visible,.cta:focus-visible{outline:2px solid var(--v);outline-offset:2px}
+.cta.main{background:var(--v);border-color:var(--v);color:#0b1020;font-weight:600}
+.hero{padding:18px 0 8px}
+.defs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin:0}
+.defs div{background:var(--surf2);border:1px solid var(--line);border-left:3px solid var(--ac,var(--line));border-radius:10px;padding:10px 14px}
+.defs dt{font-weight:600;margin:0 0 2px}
+.defs dt small{color:var(--mut);font-weight:400;margin-left:6px}
+.defs dd{margin:0;color:var(--mut);font-size:14px}
+.defs dd b{color:var(--tx);font-weight:600}
+.hero h1{font-size:clamp(34px,7vw,64px)}
+.hero .lede{font-size:18px;margin-bottom:20px}
+.ctas{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:34px}
+.feat a{display:block;color:inherit;text-decoration:none;background:var(--surf);border:1px solid var(--line);border-top:3px solid var(--ac);border-radius:12px;padding:16px}
+.feat a:hover{border-color:var(--ac);background:var(--surf2)}
+.feat h3{margin:0 0 6px;font-size:18px}
+.feat p{margin:0;color:var(--mut);font-size:14px}
+.list{color:var(--mut);padding-left:20px;margin:0}
+.list li{margin-bottom:6px}.list b{color:var(--tx);font-weight:600}
+.exp{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:20px}
+.exp .panel{border-left:3px solid var(--ac,var(--line))}
+.exp h2{font-size:18px}
+.exp p{color:var(--mut);margin:0 0 8px;font-size:15px}
+.exp p b,.exp p code{color:var(--tx);font-weight:600}
+.exp code{font:inherit;color:var(--tx)}
+.tbl{overflow-x:auto;margin-top:8px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:14px}
+.tbl th,.tbl td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.tbl th{color:var(--mut);font-weight:600}
+@media(max-width:860px){.top,.two{grid-template-columns:1fr}}
+@media(max-width:420px){.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="nav" aria-label="Pages"><span class="brand">⚡ RLC Calculator</span><a href="#home" data-p="home">Home</a><a href="#calculator" data-p="calculator">Calculator</a><a href="#explanation" data-p="explanation">Explanation</a></nav>
+
+<main class="pg" data-page="home">
+<div class="hero">
+<p class="by">Created by <b>K. Eswith Chowdary</b> · CSE-D Section</p>
+<h1>RLC series circuit calculator</h1>
+<p class="lede">Work out reactance, impedance, current, voltage drops, power and resonance for a series resistor, inductor and capacitor circuit, with every step of the working shown.</p>
+<div class="ctas"><a class="cta main" href="#calculator">Open the calculator</a><a class="cta" href="#explanation">Read the explanation</a></div>
+</div>
+<div class="feat">
+<a href="#calculator" style="--ac:var(--v)"><h3>Calculator</h3><p>Enter V, f, R, L and C and get all results instantly, with step-by-step working for each variable.</p></a>
+<a href="#explanation" style="--ac:var(--p)"><h3>Explanation</h3><p>Plain-language theory behind reactance, impedance, phase, power and resonance, plus every formula.</p></a>
+<a href="#calculator" style="--ac:var(--i)"><h3>Live visuals</h3><p>An animated circuit, waveforms and a phasor diagram that change as you type.</p></a>
+</div>
+<div class="panel" style="margin-top:34px"><h2>Basic series RLC circuit</h2>
+<p class="lede" style="margin-bottom:10px">The resistor, inductor and capacitor are connected one after another in a single loop with an AC source, so the same current flows through all three.</p>
+<div class="stage" style="border-radius:10px;border:1px solid var(--line)"><svg viewBox="0 0 820 270" role="img" aria-label="Series RLC circuit: AC source, resistor, inductor and capacitor in one loop">
+<path d="M70 104V60H750V220H70V156" fill="none" stroke="#33426e" stroke-width="3"/>
+<circle cx="70" cy="130" r="28" fill="#121a2e" stroke="#7aa2ff" stroke-width="3"/>
+<path d="M52 130q9-16 18 0t18 0" fill="none" stroke="#7aa2ff" stroke-width="2.5"/>
+<text x="110" y="126" style="fill:#7aa2ff;font-size:16px;font-weight:600">V</text><text x="110" y="146" class="mu" style="font-size:13px">AC source</text>
+<rect x="150" y="36" width="120" height="48" fill="#121a2e"/>
+<path d="M150 60H162L170 42L186 78L202 42L218 78L234 42L250 78L258 60H270" fill="none" stroke="#ffb454" stroke-width="3" stroke-linejoin="round"/>
+<rect x="360" y="36" width="120" height="48" fill="#121a2e"/>
+<path d="M360 60H372a12 12 0 0 1 24 0a12 12 0 0 1 24 0a12 12 0 0 1 24 0a12 12 0 0 1 24 0H480" fill="none" stroke="#4fd1e8" stroke-width="3"/>
+<rect x="560" y="36" width="100" height="48" fill="#121a2e"/>
+<path d="M560 60H602M602 34V86M618 34V86M618 60H660" fill="none" stroke="#b794f6" stroke-width="3"/>
+<g text-anchor="middle" style="font-size:15px">
+<text x="210" y="112" style="fill:#ffb454;font-weight:600">R</text><text x="210" y="132" class="mu" style="font-size:13px">Resistor (Ω)</text>
+<text x="420" y="112" style="fill:#4fd1e8;font-weight:600">L</text><text x="420" y="132" class="mu" style="font-size:13px">Inductor (H)</text>
+<text x="610" y="112" style="fill:#b794f6;font-weight:600">C</text><text x="610" y="132" class="mu" style="font-size:13px">Capacitor (F)</text>
+<text x="410" y="250" class="mu" style="font-size:13px">Same current I flows around the whole loop</text></g>
+<path d="M360 202H460" stroke="#ff7b9c" stroke-width="2.5"/><path d="M470 202L454 195V209Z" fill="#ff7b9c"/>
+<text x="345" y="207" text-anchor="end" style="fill:#ff7b9c;font-size:16px;font-weight:600">I</text>
+</svg></div></div>
+
+<div class="panel" style="margin-top:14px"><h2>Definitions of each term</h2>
+<dl class="defs">
+<div style="--ac:var(--v)"><dt>Voltage <small>V, volt</small></dt><dd>The electrical push from the source that drives current around the circuit. Here it is the <b>RMS</b> value of an AC supply.</dd></div>
+<div style="--ac:var(--i)"><dt>Current <small>I, ampere</small></dt><dd>The flow of electric charge through the circuit. In a series circuit it is the same in R, L and C.</dd></div>
+<div style="--ac:var(--v)"><dt>Frequency <small>f, hertz</small></dt><dd>How many complete AC cycles occur each second. Mains supply is 50 Hz in India.</dd></div>
+<div style="--ac:var(--r)"><dt>Resistance <small>R, ohm (Ω)</small></dt><dd>Opposition to current that turns electrical energy into heat. It does not depend on frequency.</dd></div>
+<div style="--ac:var(--l)"><dt>Inductance <small>L, henry (H)</small></dt><dd>The property of a coil that opposes changes in current by storing energy in a magnetic field.</dd></div>
+<div style="--ac:var(--c)"><dt>Capacitance <small>C, farad (F)</small></dt><dd>The ability to store energy in an electric field between two plates, opposing changes in voltage.</dd></div>
+<div style="--ac:var(--l)"><dt>Inductive reactance <small>X<sub>L</sub>, Ω</small></dt><dd>AC opposition from an inductor. It <b>increases</b> with frequency: X<sub>L</sub> = 2πfL.</dd></div>
+<div style="--ac:var(--c)"><dt>Capacitive reactance <small>X<sub>C</sub>, Ω</small></dt><dd>AC opposition from a capacitor. It <b>decreases</b> with frequency: X<sub>C</sub> = 1 ÷ 2πfC.</dd></div>
+<div style="--ac:var(--v)"><dt>Net reactance <small>X, Ω</small></dt><dd>The difference X<sub>L</sub> − X<sub>C</sub>. Positive is inductive, negative is capacitive, zero is resonance.</dd></div>
+<div style="--ac:var(--v)"><dt>Impedance <small>Z, Ω</small></dt><dd>The total opposition to AC from R and X combined: Z = √(R² + X²).</dd></div>
+<div style="--ac:var(--v)"><dt>Phase angle <small>φ, degree</small></dt><dd>The angle by which the current is ahead of or behind the source voltage.</dd></div>
+<div style="--ac:var(--r)"><dt>Voltage drops <small>V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub></small></dt><dd>The voltage across each component, found as the current times its R, X<sub>L</sub> or X<sub>C</sub>.</dd></div>
+<div style="--ac:var(--p)"><dt>Active power <small>P, watt</small></dt><dd>The real power used up as heat in the resistor: P = I²R.</dd></div>
+<div style="--ac:var(--p)"><dt>Reactive power <small>Q, var</small></dt><dd>Power that moves back and forth between the source and the L and C without being used up.</dd></div>
+<div style="--ac:var(--p)"><dt>Apparent power <small>S, VA</small></dt><dd>The total power the source supplies, S = V × I, made up of P and Q.</dd></div>
+<div style="--ac:var(--p)"><dt>Power factor <small>PF</small></dt><dd>The fraction of apparent power that is real power: PF = R ÷ Z = cos φ.</dd></div>
+<div style="--ac:var(--c)"><dt>Resonance <small>f₀, hertz</small></dt><dd>The frequency where X<sub>L</sub> = X<sub>C</sub>, so Z is lowest and the current is highest.</dd></div>
+<div style="--ac:var(--r)"><dt>Quality factor <small>Q</small></dt><dd>How sharp the resonance is. A higher Q means a narrower, taller resonance peak.</dd></div>
+</dl></div>
+
+<div class="panel" style="margin-top:14px"><h2>What you can calculate</h2>
+<ul class="list"><li><b>Reactances and impedance:</b> X<sub>L</sub>, X<sub>C</sub>, net X and Z</li><li><b>Current and phase:</b> I and the phase angle φ</li><li><b>Voltage drops:</b> V<sub>R</sub>, V<sub>L</sub> and V<sub>C</sub></li><li><b>Power:</b> P, Q, S and power factor</li><li><b>Resonance:</b> f₀ and quality factor Q</li></ul></div>
+</main>
+
+<div class="pg" data-page="calculator" hidden>
+<header>
+<h1>Calculator</h1>
+<p class="lede">Enter the source and the three component values. Reactances, impedance, current, voltage drops and power update as you type, with the step-by-step working for every variable shown below the results.</p>
+</header>
+
+<section class="top">
+<div class="panel">
+<h2>Circuit values</h2>
+<div id="inputs"></div>
+<div class="btns"><button id="res" type="button">Set to resonance</button><button id="rst" type="button">Reset values</button></div>
+<p id="msg" role="status"></p>
+</div>
+
+<div class="panel stage">
+<svg viewBox="0 0 820 300" role="img" aria-label="Animated series RLC circuit">
+<path d="M70 118V60H750V240H70V182" fill="none" stroke="#33426e" stroke-width="3"/>
+<path id="flow" d="M70 118V60H750V240H70V182" fill="none" stroke="#7aa2ff" stroke-width="6" stroke-linecap="round" stroke-dasharray="0.1 16"/>
+<circle cx="70" cy="150" r="32" fill="#121a2e" stroke="#7aa2ff" stroke-width="3"/>
+<line id="arm" x1="70" y1="150" x2="92" y2="150" stroke="#7aa2ff" stroke-width="3" stroke-linecap="round"/>
+<circle cx="70" cy="150" r="3" fill="#7aa2ff"/>
+<text id="tV" x="116" y="146" class="sm">230 V</text><text id="tF" x="116" y="166" class="sm mu">50 Hz</text>
+<rect x="150" y="30" width="120" height="60" fill="#121a2e"/><rect id="gR" x="150" y="34" width="120" height="52" rx="8" fill="#ffb454" opacity=".1"/>
+<path d="M150 60H162L170 42L186 78L202 42L218 78L234 42L250 78L258 60H270" fill="none" stroke="#ffb454" stroke-width="3" stroke-linejoin="round"/>
+<rect x="360" y="30" width="120" height="60" fill="#121a2e"/><rect id="gL" x="360" y="34" width="120" height="52" rx="8" fill="#4fd1e8" opacity=".1"/>
+<path d="M360 60H372a12 12 0 0 1 24 0a12 12 0 0 1 24 0a12 12 0 0 1 24 0a12 12 0 0 1 24 0H480" fill="none" stroke="#4fd1e8" stroke-width="3"/>
+<rect x="560" y="30" width="100" height="60" fill="#121a2e"/><rect id="gC" x="560" y="34" width="100" height="52" rx="8" fill="#b794f6" opacity=".1"/>
+<path d="M560 60H602M602 34V86M618 34V86M618 60H660" fill="none" stroke="#b794f6" stroke-width="3"/>
+<g text-anchor="middle" class="sm">
+<text id="tR" x="210" y="112" fill="#ffb454" style="fill:#ffb454">R</text><text id="uR" x="210" y="132" class="mu">–</text>
+<text id="tL" x="420" y="112" style="fill:#4fd1e8">L</text><text id="uL" x="420" y="132" class="mu">–</text>
+<text id="tC" x="610" y="112" style="fill:#b794f6">C</text><text id="uC" x="610" y="132" class="mu">–</text>
+<text id="tI" x="410" y="226" style="fill:#ff7b9c;font-size:17px;font-weight:600">I</text>
+<text id="tZ" x="410" y="272" class="mu">Z</text>
+</g>
+</svg>
+</div>
+</section>
+
+<div id="out"></div>
+
+<h2>Step-by-step calculation of each variable</h2>
+<p class="lede" style="margin-bottom:10px">Each card shows the formula, your values substituted in, the working and the final answer. Steps follow the order in which the variables depend on each other.</p>
+<div class="tools"><button id="openAll" type="button">Expand all</button><button id="closeAll" type="button">Collapse all</button></div>
+<div id="steps" class="steps"></div>
+
+<section class="two">
+<div class="panel"><h2>Waveforms</h2><div id="leg"></div><canvas id="wave" aria-label="Voltage and current waveforms"></canvas>
+<p class="lede" style="font-size:13px;margin-top:8px">Slowed down so you can follow it. Current is scaled to fit beside the voltages.</p></div>
+<div class="panel"><h2>Phasor diagram</h2><svg id="ph" viewBox="0 0 360 320" role="img" aria-label="Phasor diagram of V, VR, VL, VC and I" style="width:100%;height:auto"></svg>
+<p class="lede" style="font-size:13px;margin-top:8px">The dashed line is the current, used as the reference. VL points up and VC points down from the end of VR. The blue arrow V is VR plus the difference of VL and VC.</p></div>
+</section>
+
+</div>
+
+<div class="pg" data-page="explanation" hidden>
+<h1>Explanation</h1>
+<p class="lede">A series RLC circuit connects a resistor, an inductor and a capacitor one after another across an AC source, so the same current flows through all three. This page explains what each result means and how it is found.</p>
+<div class="exp">
+<div class="panel" style="--ac:var(--l)"><h2>1. Reactance</h2><p>Inductors and capacitors resist AC without dissipating energy. This opposition is called reactance and is measured in ohms.</p><p><b>Inductive:</b> <code>X<sub>L</sub> = 2πfL</code>. It grows with frequency.</p><p><b>Capacitive:</b> <code>X<sub>C</sub> = 1 ÷ 2πfC</code>. It shrinks with frequency.</p><p>The net reactance is <code>X = X<sub>L</sub> − X<sub>C</sub></code>. Positive means inductive, negative means capacitive.</p></div>
+<div class="panel" style="--ac:var(--v)"><h2>2. Impedance and phase</h2><p>Resistance and net reactance are at 90° to each other, so they add like the sides of a right triangle.</p><p><code>Z = √(R² + X²)</code></p><p>The phase angle <code>φ = tan⁻¹(X ÷ R)</code> tells how far the current is behind or ahead of the source voltage. Positive φ means the current lags.</p></div>
+<div class="panel" style="--ac:var(--i)"><h2>3. Current and voltage drops</h2><p>Ohm's law for AC gives the current: <code>I = V ÷ Z</code>.</p><p>Each part then drops its own voltage: <code>V<sub>R</sub> = IR</code>, <code>V<sub>L</sub> = IX<sub>L</sub></code>, <code>V<sub>C</sub> = IX<sub>C</sub></code>.</p><p>V<sub>R</sub> is in phase with I, V<sub>L</sub> leads by 90° and V<sub>C</sub> lags by 90°. Because of this, V<sub>L</sub> and V<sub>C</sub> can each be larger than the source voltage near resonance.</p></div>
+<div class="panel" style="--ac:var(--p)"><h2>4. Power</h2><p><b>Active power</b> <code>P = I²R</code> (watts) is the real power turned into heat in the resistor.</p><p><b>Reactive power</b> <code>Q = I²X</code> (var) swings back and forth between the source and the L and C.</p><p><b>Apparent power</b> <code>S = V·I</code> (VA) combines both, and <code>S² = P² + Q²</code>.</p><p><b>Power factor</b> <code>PF = R ÷ Z = cos φ</code> shows how much of S is real power. It is 1 at resonance.</p></div>
+<div class="panel" style="--ac:var(--c)"><h2>5. Resonance</h2><p>At one special frequency X<sub>L</sub> equals X<sub>C</sub>, so they cancel and only R is left.</p><p><code>f₀ = 1 ÷ (2π√(LC))</code></p><p>There Z is at its minimum (equal to R), the current is at its maximum and the circuit behaves as purely resistive. Use the “Set to resonance” button in the calculator to try it.</p></div>
+<div class="panel" style="--ac:var(--r)"><h2>6. Quality factor</h2><p><code>Q = (1 ÷ R)√(L ÷ C)</code></p><p>Q measures how sharp the resonance is. A high Q (small R) gives a narrow, tall resonance peak. A low Q gives a broad, flat one. It also equals the ratio of V<sub>L</sub> or V<sub>C</sub> to the source voltage at resonance.</p></div>
+</div>
+<div class="panel" style="margin-top:14px"><h2>How to use the calculator</h2>
+<ul class="list"><li>Enter the source voltage (RMS), frequency, R, L and C and pick the units.</li><li>Read the result cards, then open any card in the step-by-step section to see the working.</li><li>Watch the waveforms and phasor diagram to see the phase relationships.</li><li>Press “Set to resonance” to jump to f₀ and see X<sub>L</sub> = X<sub>C</sub>.</li></ul></div>
+<h2>Formulas used</h2>
+<div class="eq">
+<span><b>X<sub>L</sub></b> = 2πfL</span><span><b>X<sub>C</sub></b> = 1 ÷ (2πfC)</span>
+<span><b>Z</b> = √(R² + (X<sub>L</sub> − X<sub>C</sub>)²)</span><span><b>I</b> = V ÷ Z</span>
+<span><b>V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub></b> = I·R, I·X<sub>L</sub>, I·X<sub>C</sub></span><span><b>φ</b> = atan((X<sub>L</sub> − X<sub>C</sub>) ÷ R)</span>
+<span><b>P</b> = I²R</span><span><b>Q</b> = I²(X<sub>L</sub> − X<sub>C</sub>)</span>
+<span><b>S</b> = V·I</span><span><b>PF</b> = R ÷ Z = cos φ</span>
+<span><b>Form factor</b> = V<sub>rms</sub> ÷ V<sub>avg</sub> = π ÷ (2√2) for a sine wave</span><span><b>f₀</b> = 1 ÷ (2π√(LC)), <b>Q</b> = (1 ÷ R)√(L ÷ C)</span>
+</div>
+
+<div class="panel" style="margin-top:30px"><h2>Symbols and units</h2><div class="tbl"><table><thead><tr><th>Symbol</th><th>Meaning</th><th>Unit</th></tr></thead><tbody><tr><td>V</td><td>Source voltage (RMS)</td><td>volt (V)</td></tr><tr><td>f</td><td>Frequency</td><td>hertz (Hz)</td></tr><tr><td>R, L, C</td><td>Resistance, inductance, capacitance</td><td>Ω, H, F</td></tr><tr><td>X<sub>L</sub>, X<sub>C</sub>, X</td><td>Reactances</td><td>Ω</td></tr><tr><td>Z</td><td>Impedance</td><td>Ω</td></tr><tr><td>φ</td><td>Phase angle</td><td>degree (°)</td></tr><tr><td>I</td><td>Current (RMS)</td><td>ampere (A)</td></tr><tr><td>P, Q, S</td><td>Active, reactive, apparent power</td><td>W, var, VA</td></tr></tbody></table></div></div>
+</div>
+
+<footer>Prepared by <b>K. Eswith Chowdary</b> · CSE-D Section</footer>
+</div>
+
+<script>
+const g=id=>document.getElementById(id);
+const PFX=[[1e12,'T'],[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n'],[1e-12,'p']];
+const si=(x,u)=>{if(!isFinite(x))return['–',''];if(x===0)return['0',u];const a=Math.abs(x),p=PFX.find(p=>a>=p[0]*.9995)||PFX[8];return[String(+(x/p[0]).toPrecision(4)),p[1]+u]};
+const fs=(x,u)=>si(x,u).join(' ');
+const nm=x=>isFinite(x)?String(+x.toPrecision(5)):'–';
+const FIELDS=[
+['v','Source voltage (RMS)',230,[['V',1],['kV',1e3]]],
+['f','Frequency',50,[['Hz',1],['kHz',1e3]]],
+['r','Resistance R',50,[['Ω',1],['kΩ',1e3],['mΩ',1e-3]]],
+['l','Inductance L',200,[['mH',1e-3],['H',1],['µH',1e-6]]],
+['c','Capacitance C',100,[['µF',1e-6],['nF',1e-9],['mF',1e-3],['pF',1e-12]]]];
+g('inputs').innerHTML=FIELDS.map(([id,lb,d,u])=>`<div class="fld"><label for="${id}">${lb}</label><div class="row"><input id="${id}" type="number" inputmode="decimal" step="any" min="0" value="${d}"><select id="${id}u" aria-label="${lb} unit">${u.map(x=>`<option value="${x[1]}">${x[0]}</option>`).join('')}</select></div></div>`).join('');
+const rd=id=>parseFloat(g(id).value)*parseFloat(g(id+'u').value);
+let S=null,th=.6;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function steps(d){
+ const {V,f,R,L,C,XL,XC,X,Z,I,phi,VR,VL,VC,P,Q,Sa,PF,ok,f0,Qf,FF,deg}=d;
+ const pi='π',Xr=nm(X),Zr=nm(Z);
+ const T=[
+ ['X<sub>L</sub> · Inductive reactance','--l',fs(XL,'Ω'),[
+  ['Formula','XL = 2π × f × L'],
+  ['Substitute',`XL = 2 × ${pi} × ${nm(f)} Hz × ${nm(L)} H`],
+  ['Multiply',`2π × ${nm(f)} = ${nm(2*Math.PI*f)}, then × ${nm(L)}`],
+  ['Result',`XL = ${nm(XL)} Ω`]]],
+ ['X<sub>C</sub> · Capacitive reactance','--c',fs(XC,'Ω'),C>0?[
+  ['Formula','XC = 1 ÷ (2π × f × C)'],
+  ['Substitute',`XC = 1 ÷ (2 × ${pi} × ${nm(f)} Hz × ${nm(C)} F)`],
+  ['Denominator',`2π × ${nm(f)} × ${nm(C)} = ${nm(2*Math.PI*f*C)}`],
+  ['Result',`XC = 1 ÷ ${nm(2*Math.PI*f*C)} = ${nm(XC)} Ω`]]:[
+  ['Note','C is empty, so the capacitor is left out'],['Result','XC = 0 Ω']]],
+ ['X · Net reactance','--v',fs(X,'Ω'),[
+  ['Formula','X = XL − XC'],
+  ['Substitute',`X = ${nm(XL)} − ${nm(XC)}`],
+  ['Result',`X = ${Xr} Ω (${Math.abs(X)<1e-9*Z?'resonant':X>0?'inductive':'capacitive'})`]]],
+ ['Z · Impedance','--v',fs(Z,'Ω'),[
+  ['Formula','Z = √(R² + X²)'],
+  ['Substitute',`Z = √(${nm(R)}² + (${Xr})²)`],
+  ['Square',`${nm(R*R)} + ${nm(X*X)} = ${nm(R*R+X*X)}`],
+  ['Result',`Z = √${nm(R*R+X*X)} = ${Zr} Ω`]]],
+ ['φ · Phase angle','--v',deg.toFixed(2)+'°',[
+  ['Formula','φ = tan⁻¹(X ÷ R)'],
+  ['Substitute',`φ = tan⁻¹(${Xr} ÷ ${nm(R)})`],
+  ['Ratio',`X ÷ R = ${nm(R>0?X/R:NaN)}`],
+  ['Result',`φ = ${deg.toFixed(2)}° (${Math.abs(deg)<.005?'in phase':deg>0?'voltage leads current':'current leads voltage'})`]]],
+ ['I · Current','--i',fs(I,'A'),[
+  ['Formula','I = V ÷ Z'],
+  ['Substitute',`I = ${nm(V)} V ÷ ${Zr} Ω`],
+  ['Result',`I = ${nm(I)} A`],
+  ['Peak value',`Im = I × √2 = ${nm(I*Math.SQRT2)} A`]]],
+ ['V<sub>R</sub> · Voltage across R','--r',fs(VR,'V'),[
+  ['Formula','VR = I × R'],['Substitute',`VR = ${nm(I)} A × ${nm(R)} Ω`],['Result',`VR = ${nm(VR)} V (in phase with I)`]]],
+ ['V<sub>L</sub> · Voltage across L','--l',fs(VL,'V'),[
+  ['Formula','VL = I × XL'],['Substitute',`VL = ${nm(I)} A × ${nm(XL)} Ω`],['Result',`VL = ${nm(VL)} V (leads I by 90°)`]]],
+ ['V<sub>C</sub> · Voltage across C','--c',fs(VC,'V'),[
+  ['Formula','VC = I × XC'],['Substitute',`VC = ${nm(I)} A × ${nm(XC)} Ω`],['Result',`VC = ${nm(VC)} V (lags I by 90°)`]]],
+ ['P · Active power','--p',fs(P,'W'),[
+  ['Formula','P = I² × R'],['Substitute',`P = (${nm(I)})² × ${nm(R)}`],['Square',`I² = ${nm(I*I)}`],['Result',`P = ${nm(P)} W`]]],
+ ['Q · Reactive power','--p',fs(Q,'var'),[
+  ['Formula','Q = I² × (XL − XC)'],['Substitute',`Q = ${nm(I*I)} × ${Xr}`],['Result',`Q = ${nm(Q)} var`]]],
+ ['S · Apparent power','--p',fs(Sa,'VA'),[
+  ['Formula','S = V × I'],['Substitute',`S = ${nm(V)} V × ${nm(I)} A`],['Result',`S = ${nm(Sa)} VA`],['Check',`√(P² + Q²) = ${nm(Math.hypot(P,Q))} VA`]]],
+ ['PF · Power factor','--p',PF.toFixed(4),[
+  ['Formula','PF = R ÷ Z = cos φ'],['Substitute',`PF = ${nm(R)} ÷ ${Zr}`],['Result',`PF = ${PF.toFixed(4)} (${Math.abs(X)<1e-9*Z?'unity':X>0?'lagging':'leading'})`]]],
+ ['Form factor','--v',FF.toFixed(4),[
+  ['Formula','Vrms ÷ Vavg = π ÷ (2√2)'],['Substitute',`${pi} ÷ (2 × ${nm(Math.SQRT2)})`],['Result',`Form factor = ${FF.toFixed(4)} (sine wave)`]]],
+ ['f₀ · Resonant frequency','--v',ok?fs(f0,'Hz'):'–',ok?[
+  ['Formula','f₀ = 1 ÷ (2π√(L × C))'],['Substitute',`f₀ = 1 ÷ (2π × √(${nm(L)} × ${nm(C)}))`],['Root',`√(LC) = ${nm(Math.sqrt(L*C))}`],['Result',`f₀ = ${nm(f0)} Hz`]]:[
+  ['Note','Needs both L and C above zero']]],
+ ['Q · Quality factor','--v',isFinite(Qf)?nm(Qf):'–',isFinite(Qf)?[
+  ['Formula','Q = (1 ÷ R) × √(L ÷ C)'],['Substitute',`Q = (1 ÷ ${nm(R)}) × √(${nm(L)} ÷ ${nm(C)})`],['Root',`√(L ÷ C) = ${nm(Math.sqrt(L/C))}`],['Result',`Q = ${nm(Qf)}`]]:[
+  ['Note','Needs R, L and C above zero']]]];
+ const open=g('steps').querySelector('details[open]')!==null||!g('steps').children.length;
+ g('steps').innerHTML=T.map(([t,c,r,ls],i)=>`<details class="st"${i<4?' open':''} style="--ac:var(${c})"><summary><div class="sh"><span style="color:var(--tx)">${t}</span><span>${r}</span></div></summary><ol>${ls.map(([a,b])=>`<li class="${a==='Result'?'res':''}"><b>${a}:</b> <code>${b}</code></li>`).join('')}</ol></details>`).join('');
+}
+
+function calc(){
+ const V=rd('v'),f=rd('f'),R=rd('r')||0,L=rd('l')||0,C=rd('c')||0;
+ const err=m=>{g('msg').textContent=m;S=null;g('out').innerHTML='';g('steps').innerHTML='';};
+ if(!(V>0))return err('Enter a source voltage above 0.');
+ if(!(f>0))return err('Enter a frequency above 0 Hz.');
+ if(R<0||L<0||C<0)return err('Values cannot be negative.');
+ const XL=2*Math.PI*f*L,XC=C>0?1/(2*Math.PI*f*C):0,X=XL-XC,Z=Math.hypot(R,X);
+ if(Z<1e-9)return err('Z is zero: at resonance with R = 0 the current is unbounded. Add some resistance.');
+ g('msg').textContent=C>0?'':'C is empty, so the capacitor is left out (XC = 0).';
+ const I=V/Z,phi=Math.atan2(X,R),VR=I*R,VL=I*XL,VC=I*XC,P=I*I*R,Q=I*I*X,Sa=V*I,PF=R/Z;
+ const ok=L>0&&C>0,f0=ok?1/(2*Math.PI*Math.sqrt(L*C)):NaN,Qf=ok&&R>0?Math.sqrt(L/C)/R:NaN;
+ const FF=Math.PI/(2*Math.SQRT2);
+ S={V,f,R,L,C,XL,XC,X,Z,I,phi,VR,VL,VC,f0,Vm:V*Math.SQRT2,VRm:VR*Math.SQRT2,VLm:VL*Math.SQRT2,VCm:VC*Math.SQRT2};
+ const deg=phi*180/Math.PI;
+ const kind=Math.abs(X)<1e-9*Z?'resonant, purely resistive':X>0?'inductive, current lags':'capacitive, current leads';
+ const G=[
+ ['Reactance and impedance',[
+  ['Inductive reactance XL',si(XL,'Ω'),'2πfL','--l'],
+  ['Capacitive reactance XC',si(XC,'Ω'),'1 ÷ 2πfC','--c'],
+  ['Net reactance X',si(X,'Ω'),kind,'--v'],
+  ['Impedance Z',si(Z,'Ω'),'magnitude of R + jX','--v'],
+  ['Phase angle φ',[String(+deg.toFixed(2)),'°'],'voltage leads current when positive','--v']]],
+ ['Current and voltage drops',[
+  ['Current I',si(I,'A'),'peak '+fs(I*Math.SQRT2,'A'),'--i'],
+  ['Across R, VR',si(VR,'V'),'in phase with I','--r'],
+  ['Across L, VL',si(VL,'V'),'leads I by 90°','--l'],
+  ['Across C, VC',si(VC,'V'),'lags I by 90°','--c']]],
+ ['Power and quality',[
+  ['Active power P',si(P,'W'),'dissipated in R','--p'],
+  ['Reactive power Q',si(Q,'var'),Q>1e-9*Sa?'net inductive':Q<-1e-9*Sa?'net capacitive':'balanced','--p'],
+  ['Apparent power S',si(Sa,'VA'),'V × I','--p'],
+  ['Power factor',[PF.toFixed(4),''],Math.abs(X)<1e-9*Z?'unity':X>0?'lagging':'leading','--p'],
+  ['Form factor',[FF.toFixed(4),''],'Vrms ÷ Vavg, sine wave','--v'],
+  ['Resonant frequency f₀',ok?si(f0,'Hz'):['–',''],'where XL = XC','--v'],
+  ['Quality factor Q',[isFinite(Qf)?String(+Qf.toPrecision(4)):'–',''],'(1 ÷ R)√(L ÷ C)','--v']]]];
+ g('out').innerHTML=G.map(([t,cs])=>`<h2>${t}</h2><div class="grp">${cs.map(([n,v,s,c])=>`<div class="card" style="--ac:var(${c})"><div class="n">${n}</div><div class="v">${v[0]}<small>${v[1]}</small></div><div class="s">${s}</div></div>`).join('')}</div>`).join('');
+ g('tV').textContent=fs(V,'V');g('tF').textContent=fs(f,'Hz');
+ g('tR').textContent='R = '+fs(R,'Ω');g('tL').textContent='L = '+fs(L,'H');g('tC').textContent='C = '+(C>0?fs(C,'F'):'none');
+ g('uR').textContent=fs(VR,'V');g('uL').textContent=fs(VL,'V');g('uC').textContent=fs(VC,'V');
+ g('tI').textContent='I = '+fs(I,'A');g('tZ').textContent='Z = '+fs(Z,'Ω')+'  ∠ '+deg.toFixed(1)+'°';
+ const wasOpen=[...g('steps').children].map(d=>d.open);
+ steps({V,f,R,L,C,XL,XC,X,Z,I,phi,VR,VL,VC,P,Q,Sa,PF,ok,f0,Qf,FF,deg});
+ if(wasOpen.length)[...g('steps').children].forEach((d,i)=>d.open=!!wasOpen[i]);
+ phasor();
+}
+
+function arr(x1,y1,x2,y2,c){
+ const d=Math.hypot(x2-x1,y2-y1);if(d<3)return'';
+ const a=Math.atan2(y2-y1,x2-x1),h=Math.min(9,d*.6),e=h*.8;
+ return`<line x1="${x1}" y1="${y1}" x2="${x2-e*Math.cos(a)}" y2="${y2-e*Math.sin(a)}" stroke="${c}" stroke-width="2.5"/><path d="M${x2} ${y2}L${x2-h*Math.cos(a-.4)} ${y2-h*Math.sin(a-.4)}L${x2-h*Math.cos(a+.4)} ${y2-h*Math.sin(a+.4)}Z" fill="${c}"/>`;
+}
+const tx=(x,y,t,c,an)=>`<text x="${x}" y="${y}" text-anchor="${an}" style="fill:${c}" font-size="13">${t}</text>`;
+function phasor(){
+ const o=50,W=360,H=320,eps=1e-12,{VR,VL,VC,phi}=S;
+ const s=Math.min(220/Math.max(VR,eps),(H-60)/Math.max(VL+VC,eps));
+ const oy=36+s*VL,ax=o+s*VR,by=oy-s*VL,ey=oy+s*VC,cy=oy-s*(VL-VC);
+ const deg=phi*180/Math.PI,ad=Math.abs(deg),Vt=Math.hypot(VR,VL-VC);
+ let h=`<text x="10" y="20" class="mu" font-size="13">${ad<.05?'V and I are in phase':'V '+(deg>0?'leads':'lags')+' I by '+ad.toFixed(1)+'°'}</text>`;
+ h+=`<line x1="${o}" y1="${oy}" x2="${W-10}" y2="${oy}" stroke="#ff7b9c" stroke-width="1.5" stroke-dasharray="6 5" opacity=".8"/>`+tx(o-8,oy+4,'I','#ff7b9c','end');
+ if(ad>2&&s*Vt>50){const r=30;h+=`<path d="M${o+r} ${oy}A${r} ${r} 0 0 ${phi>0?0:1} ${o+r*Math.cos(phi)} ${oy-r*Math.sin(phi)}" fill="none" stroke="#93a0c0" stroke-width="1.5"/>`;
+  if(ad>12)h+=tx(o+46*Math.cos(phi/2),oy-46*Math.sin(phi/2)+4,'φ','#93a0c0','middle')}
+ h+=arr(o,oy,ax,oy,'#ffb454')+arr(ax,oy,ax,by,'#4fd1e8')+arr(ax,oy,ax,ey,'#b794f6')+arr(o,oy,ax,cy,'#7aa2ff');
+ h+=`<circle cx="${ax}" cy="${cy}" r="3.5" fill="#e8edf8"/>`;
+ if(VR>0)h+=s*VR<70?tx(o+6,oy+18,'VR '+fs(VR,'V'),'#ffb454','start'):tx((o+ax)/2,oy+18,'VR '+fs(VR,'V'),'#ffb454','middle');
+ if(s*VL>=16)h+=tx(ax+8,(oy+by)/2+4,'VL '+fs(VL,'V'),'#4fd1e8','start');
+ if(s*VC>=16)h+=tx(ax+8,(oy+ey)/2+4,'VC '+fs(VC,'V'),'#b794f6','start');
+ if(s*Vt>20){const dx=(ax-o)/(s*Vt),dy=(cy-oy)/(s*Vt),n=phi>=0?[dy,-dx]:[-dy,dx],px=(o+ax)/2+14*n[0],py=(oy+cy)/2+14*n[1]+4;
+  h+=tx(px,py,'V '+fs(S.V,'V'),'#7aa2ff',Math.abs(n[0])<.4?'middle':n[0]<0?'end':'start')}
+ g('ph').innerHTML=h;
+}
+
+const SER=[['v','V source','#7aa2ff'],['i','I (scaled)','#ff7b9c'],['vR','VR','#ffb454'],['vL','VL','#4fd1e8'],['vC','VC','#b794f6']];
+const on=new Set(['v','i','vR','vL','vC']);
+g('leg').innerHTML=SER.map(([k,n,c])=>`<button type="button" data-k="${k}" aria-pressed="true"><i style="background:${c}"></i>${n}</button>`).join('');
+g('leg').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;on.has(k)?on.delete(k):on.add(k);b.classList.toggle('off',!on.has(k));b.setAttribute('aria-pressed',on.has(k))};
+
+function wave(){
+ const cv=g('wave'),d=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+ if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d)}
+ const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,w,h);
+ x.strokeStyle='#27345a';x.lineWidth=1;x.beginPath();x.moveTo(0,h/2);x.lineTo(w,h/2);x.stroke();
+ const mx=Math.max(S.Vm,S.VRm,S.VLm,S.VCm),sc=(h/2-12)/mx,p=S.phi;
+ const D={v:[S.Vm,0],i:[S.Vm*.6,-p],vR:[S.VRm,-p],vL:[S.VLm,-p+Math.PI/2],vC:[S.VCm,-p-Math.PI/2]};
+ SER.forEach(([k,n,c])=>{if(!on.has(k))return;const[A,sh]=D[k];x.strokeStyle=c;x.lineWidth=k==='v'?3:2;x.setLineDash(k==='i'?[7,5]:[]);x.beginPath();
+  for(let px=0;px<=w;px+=2){const t=th+px/w*4*Math.PI,y=h/2-A*sc*Math.sin(t+sh);px?x.lineTo(px,y):x.moveTo(px,y)}x.stroke()});
+ x.setLineDash([]);x.strokeStyle='#ffffff55';x.beginPath();x.moveTo(w*.5,6);x.lineTo(w*.5,h-6);x.stroke();
+}
+
+function frame(){
+ if(!reduce)th+=.036;
+ if(S){
+  const mx=Math.max(S.VR,S.VL,S.VC)||1,p=S.phi,amp=4+28*S.I/(S.I+1);
+  g('flow').style.strokeDashoffset=-amp*Math.cos(th-p);
+  g('arm').setAttribute('x2',70+22*Math.cos(th));g('arm').setAttribute('y2',150-22*Math.sin(th));
+  g('gR').style.opacity=.08+.6*S.VR/mx*Math.sin(th-p)**2;
+  g('gL').style.opacity=.08+.6*S.VL/mx*Math.abs(Math.cos(th-p));
+  g('gC').style.opacity=.08+.6*S.VC/mx*Math.abs(Math.cos(th-p));
+  wave();
+ }
+ requestAnimationFrame(frame);
+}
+
+g('inputs').addEventListener('input',calc);
+g('openAll').onclick=()=>[...g('steps').children].forEach(d=>d.open=true);
+g('closeAll').onclick=()=>[...g('steps').children].forEach(d=>d.open=false);
+g('res').onclick=()=>{if(S&&isFinite(S.f0)){g('fu').value=1;g('f').value=+S.f0.toPrecision(6);calc()}else g('msg').textContent='Resonance needs both L and C above zero.'};
+g('rst').onclick=()=>{FIELDS.forEach(([id,,d])=>{g(id).value=d;g(id+'u').selectedIndex=0});calc()};
+const PGS=['home','calculator','explanation'];
+function route(){let h=location.hash.slice(1);if(!PGS.includes(h))h='home';
+ document.querySelectorAll('.pg').forEach(e=>e.hidden=e.dataset.page!==h);
+ document.querySelectorAll('.nav a').forEach(a=>a.setAttribute('aria-current',a.dataset.p===h?'page':'false'));
+ document.title=({home:'RLC series circuit calculator',calculator:'Calculator · RLC circuit',explanation:'Explanation · RLC circuit'})[h];
+ window.scrollTo(0,0)}
+addEventListener('hashchange',route);
+route();calc();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
